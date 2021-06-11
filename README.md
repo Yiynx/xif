@@ -20,7 +20,7 @@ Java if 扩展工具包 - if处理逻辑解耦
 <dependency>
     <groupId>cn.yiynx</groupId>
     <artifactId>xif</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 ## 配置
@@ -142,3 +142,9 @@ class DemoApplicationTests {
 }
 ```
 
+# 第三方依赖关系
+| 名称                        | 开源许可证          | 版本              | 
+| ---------------------------| ----------------- | ---------------- |
+| Spring Framework           | Apache-2.0        | 5.3.7            | 
+| Apache Log4j               | Apache-2.0        | 2.14.1           |     
+| slf4j                      | MIT               | 1.7.25           |
