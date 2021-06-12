@@ -101,7 +101,7 @@ public class XifListenerMethodProcessor implements SmartInitializingSingleton, A
                     try {
                         processBean(beanName, type);
                     } catch (Throwable ex) {
-                        throw new BeanInitializationException("Failed to process @MessageEventListener annotation on bean with name '" + beanName + "'", ex);
+                        throw new BeanInitializationException("Failed to process @XifListener annotation on bean with name '" + beanName + "'", ex);
                     }
                 }
             }
@@ -121,7 +121,7 @@ public class XifListenerMethodProcessor implements SmartInitializingSingleton, A
 
             if (CollectionUtils.isEmpty(annotatedMethods)) {
                 this.nonAnnotatedClasses.add(targetType);
-                log.trace("No @MessageListener annotations found on bean class: {}", targetType.getName());
+                log.trace("No @XifListener annotations found on bean class: {}", targetType.getName());
             } else {
                 // Non-empty set of methods
                 ConfigurableApplicationContext context = this.applicationContext;
@@ -146,12 +146,13 @@ public class XifListenerMethodProcessor implements SmartInitializingSingleton, A
                         }
 
                         @Override
-                        public <T> void handler(T param) {
+                        public <T> Object handler(T param) {
                             try {
-                                method.invoke(context.getBean(beanName), param);
+                                return method.invoke(context.getBean(beanName), param);
                             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                                 log.error("invoke!", e);
                             }
+                            return null;
                         }
                     };
                     Xif.register(xifHandler);

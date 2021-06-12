@@ -11,6 +11,8 @@
  */
 package cn.yiynx.xif.core;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Xif处理器接口
  * @author www@yiynx.cn
@@ -29,6 +31,10 @@ public interface XifHandler {
      */
     String getCondition();
 
+    default boolean isElse() {
+        return !StringUtils.hasText(getCondition());
+    }
+
     /**
      * Xif监听注解的方法
      * @return xif条件参数名称
@@ -40,5 +46,5 @@ public interface XifHandler {
      * @param param 参数
      * @param <T> xif参数泛型
      */
-    <T> void handler(T param);
+    <T> Object handler(T param);
 }

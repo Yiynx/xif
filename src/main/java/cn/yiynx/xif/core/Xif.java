@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.expression.*;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -28,13 +30,21 @@ public class Xif {
     private static final Logger log = LoggerFactory.getLogger(Xif.class);
     private static final Map<String, List<XifHandler>> XIF_HANDLER_MAP = new HashMap<>();
     private static final ExpressionParser parser = new SpelExpressionParser();
+    private static final Map<String, Boolean> CHECK_XIF_HANDLER_REPEAT = new HashMap<>();
     /**
      * 注册Xif处理
      * @param xifHandler xif处理棋
      */
     public static void register(XifHandler xifHandler) {
         log.info("Xif-register->group:{}, condition:{}", xifHandler.getGroup(), xifHandler.getCondition());
+        Assert.hasText(xifHandler.getGroup(), "xif-group not empty");
+
         preParseExpression(xifHandler.getCondition());
+
+        String UNIQUE_KEY = xifHandler.getGroup().concat("#").concat(xifHandler.getCondition());
+        log.debug("XIF-UNIQUE_KEY:{}", UNIQUE_KEY);
+        Assert.isTrue(CHECK_XIF_HANDLER_REPEAT.putIfAbsent(UNIQUE_KEY, Boolean.TRUE) == null, "xif-group:condition already exists");
+
         if (!XIF_HANDLER_MAP.containsKey(xifHandler.getGroup())) {
             XIF_HANDLER_MAP.put(xifHandler.getGroup(), new ArrayList<>());
         }
@@ -47,6 +57,9 @@ public class Xif {
      * @param condition xif条件
      */
     private static void preParseExpression(String condition) {
+        if (!StringUtils.hasText(condition)) {
+            return;
+        }
         try {
             parser.parseExpression(condition);
         } catch (ParseException e) {
@@ -61,15 +74,18 @@ public class Xif {
      * @param param xif参数
      * @param <T> xif参数泛型
      */
-    public static <T> void handler(String group, T param) {
+    public static <T> Object handler(String group, T param) {
         log.debug("group:{}, param:{}", group, param);
         ExpressionParser parser = new SpelExpressionParser();
-        Optional.ofNullable(XIF_HANDLER_MAP.get(group))
+        Optional<XifHandler> xifHandlerOptional = Optional.ofNullable(XIF_HANDLER_MAP.get(group))
                 .orElseThrow(() -> new IllegalArgumentException("xif-group（"+group+"）not found"))
                 .stream()
                 .filter(xifHandler -> {
                     try {
                         log.debug("group:{}, condition:{}, param:{}", xifHandler.getGroup(), xifHandler.getCondition(), param);
+                        if (xifHandler.isElse()) { // xif-else
+                            return false;
+                        }
                         Expression expression = parser.parseExpression(xifHandler.getCondition());
                         EvaluationContext context = new StandardEvaluationContext();
                         context.setVariable(xifHandler.getParamName(), param);
@@ -80,6 +96,17 @@ public class Xif {
                         log.error("xifHandler-filter-error", e);
                     }
                     return false;
-                }).forEach(xifHandler -> xifHandler.handler(param));
+                }).findAny();
+        // if
+        if (xifHandlerOptional.isPresent()) {
+            return xifHandlerOptional.get().handler(param);
+        }
+        // else
+        xifHandlerOptional = XIF_HANDLER_MAP.get(group).stream().filter(XifHandler::isElse).findAny();
+        if (xifHandlerOptional.isPresent()) {
+            return xifHandlerOptional.get().handler(param);
+        }
+        log.debug("xif-handler-other: return null");
+        return null;
     }
 }

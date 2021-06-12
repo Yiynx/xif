@@ -14,7 +14,8 @@ package cn.yiynx.xif.core;
 import java.lang.annotation.*;
 
 /**
- * Xif监听方法注解.
+ * Xif监听方法注解.<br>
+ * xif group和condition不能重复，condition有值时为if，无值时为else
  * @author www@yiynx.cn
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -32,5 +33,5 @@ public @interface XifListener {
      * 处理条件(SpEL表达式)
      * @return xif条件
      */
-    String condition();
+    String condition() default "";
 }

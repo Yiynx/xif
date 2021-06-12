@@ -20,7 +20,7 @@ Java if 扩展工具包 - if处理逻辑解耦
 <dependency>
     <groupId>cn.yiynx</groupId>
     <artifactId>xif</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 ## 配置
@@ -55,6 +55,8 @@ public void testIf() {
         log.info("【if】type等于type1 且 data等于2021 处理");
     } else if ("type2".equals(abc.getType())) {
         log.info("【if】type等于type2 处理");
+    } else {
+        log.info("【if】type eslse 处理");
     }
 }
 ```
@@ -75,6 +77,11 @@ public void testIf() {
     @XifListener(group = "xif-group-abc", condition = "#abc.type eq 'type2'")
     public void type2(Abc abc) {
         log.info("【xif】type等于type2 处理");
+    }
+    
+    @XifListener(group = "xif-group-abc")
+    public void type2(Abc abc) {
+        log.info("【xif】type else 处理");
     }
 ```
 
@@ -99,20 +106,32 @@ package cn.yiynx.demo;
 
 import cn.yiynx.xif.core.XifListener;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.Future;
 
 @Slf4j
 @Component
 public class AbcXifHandler {
 
+    @Async
     @XifListener(group = "xif-group-abc", condition = "#abc.type eq 'type1' and #abc.data eq 2021")
-    public void type1(Abc abc) {
+    public Future<Boolean> type1(Abc abc) {
         log.info("【xif】type等于type1 且 data等于2021 处理");
+        return new AsyncResult<>(true);
     }
 
     @XifListener(group = "xif-group-abc", condition = "#abc.type eq 'type2'")
-    public void type2(Abc abc) {
+    public Boolean type2(Abc abc) {
         log.info("【xif】type等于type2 处理");
+        return true;
+    }
+    
+    @XifListener(group = "xif-group-abc")
+    public void type2(Abc abc) {
+        log.info("【xif】type else 处理");
     }
 }
 ```
@@ -141,6 +160,10 @@ class DemoApplicationTests {
 	}
 }
 ```
+日志
+```
+logging.level.cn.yiynx.xif=debug
+``` 
 
 # 第三方依赖关系
 | 名称                        | 开源许可证          | 版本              | 
