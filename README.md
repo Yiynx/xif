@@ -80,7 +80,7 @@ public void testIf() {
     }
     
     @XifListener(group = "xif-group-abc")
-    public void type2(Abc abc) {
+    public void typeElse(Abc abc) {
         log.info("【xif】type else 处理");
     }
 ```
@@ -130,7 +130,7 @@ public class AbcXifHandler {
     }
     
     @XifListener(group = "xif-group-abc")
-    public void type2(Abc abc) {
+    public void typeElse(Abc abc) {
         log.info("【xif】type else 处理");
     }
 }
@@ -168,6 +168,6 @@ logging.level.cn.yiynx.xif=debug
 # 第三方依赖关系
 | 名称                        | 开源许可证          | 版本              | 
 | ---------------------------| ----------------- | ---------------- |
-| Spring Framework           | Apache-2.0        | 5.3.7            | 
+| Spring Framework（aop、beans、context、core、expression、jcl）           | Apache-2.0        | 5.3.7            | 
 | Apache Log4j               | Apache-2.0        | 2.14.1           |     
 | slf4j                      | MIT               | 1.7.25           |
