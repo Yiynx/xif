@@ -45,6 +45,7 @@ public interface XifHandler {
      * Xif处理方法
      * @param param 参数
      * @param <T> xif参数泛型
+     * @return 处理结果
      */
     <T> Object handler(T param);
 }

@@ -73,6 +73,7 @@ public class Xif {
      * @param group xif分组名称
      * @param param xif参数
      * @param <T> xif参数泛型
+     * @return 处理结果
      */
     public static <T> Object handler(String group, T param) {
         log.debug("group:{}, param:{}", group, param);
