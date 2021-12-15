@@ -2,7 +2,7 @@
   <a href="https://search.maven.org/artifact/cn.yiynx/xif">
     <img alt="maven" src="https://img.shields.io/maven-central/v/cn.yiynx/xif.svg?style=flat-square">
   </a>
-  <a target="_blank" href="https://license.coscl.org.cn/MulanPSL2/">
+  <a target="_blank" href="http://license.coscl.org.cn/MulanPSL2/">
     <img alt="license" src="https://img.shields.io/:license-MulanPSL2-blue.svg" />
   </a>
   <a target="_blank" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">
@@ -20,7 +20,7 @@ Java if 扩展工具包 - if处理逻辑解耦
 <dependency>
     <groupId>cn.yiynx</groupId>
     <artifactId>xif</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 ## 配置
