@@ -169,5 +169,5 @@ logging.level.cn.yiynx.xif=debug
 | 名称                        | 开源许可证          | 版本              | 
 | ---------------------------| ----------------- | ---------------- |
 | Spring Framework（aop、beans、context、core、expression、jcl）           | Apache-2.0        | 5.3.13            | 
-| Apache Log4j               | Apache-2.0        | 2.15.0           |     
+| Apache Log4j               | Apache-2.0        | 2.16.0           |     
 | slf4j                      | MIT               | 1.7.25           |

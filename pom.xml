@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cn.yiynx</groupId>
 	<artifactId>xif</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<name>xif</name>
 	<description>Java if extension tools</description>
 	<url>https://github.com/Yiynx/xif</url>
@@ -15,7 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<spring.version>5.3.13</spring.version>
-		<log4j.version>2.15.0</log4j.version>
+		<log4j.version>2.16.0</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
 	</properties>
 	<dependencies>
