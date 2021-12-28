@@ -31,10 +31,8 @@ package cn.yiynx.demo;
 import cn.yiynx.xif.scan.XifScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 @XifScan
-@EnableAsync
 @SpringBootApplication
 public class DemoApplication {
 
@@ -50,13 +48,13 @@ public class DemoApplication {
 ``` java
 public void testIf() {
     log.info("testIf");
-    Abc<Integer> abc = new Abc<Integer>().setType("type1").setData(2021);
-    if ("type1".equals(abc.getType()) && Objects.equals(2021, abc.getData())) {
-        log.info("【if】type等于type1 且 data等于2021 处理");
-    } else if ("type2".equals(abc.getType())) {
-        log.info("【if】type等于type2 处理");
+    Message message = new Message<>().setType("type1");
+    if ("type1".equals(message.getType())) {
+        log.info("【if】type等于type1 处理:{}", message);
+    } else if ("type2".equals(message.getType())) {
+        log.info("【if】type等于type2 处理:{}", message);
     } else {
-        log.info("【if】type eslse 处理");
+        log.info("【if】type else 处理:{}", message);
     }
 }
 ```
@@ -64,24 +62,23 @@ public void testIf() {
 ``` java
     public void testXif() {
         log.info("testXif");
-        Abc<Integer> abc = new Abc<Integer>().setType("type1").setData(2021);
-        Xif.handler("xif-group-abc", abc);
+        Message message = new Message<>().setType("type1");
+        Xif.handler("xif-group-message", message);
     }
     
-    @Async
-    @XifListener(group = "xif-group-abc", condition = "#abc.type eq 'type1' and #abc.data eq 2021")
-    public void type1(Abc abc) {
-        log.info("【xif】type等于type1 且 data等于2021 处理");
+    @XifListener(group = "xif-group-message", condition = "#message.type eq 'type1'")
+    public void type1(Message message) {
+        log.info("【xif】type等于type1处理:{}", message);
     }
 
-    @XifListener(group = "xif-group-abc", condition = "#abc.type eq 'type2'")
-    public void type2(Abc abc) {
-        log.info("【xif】type等于type2 处理");
+    @XifListener(group = "xif-group-message", condition = "#message.type eq 'type2'")
+    public void type2(Message message) {
+        log.info("【xif】type等于type2 处理:{}", message);
     }
-    
-    @XifListener(group = "xif-group-abc")
-    public void typeElse(Abc abc) {
-        log.info("【xif】type else 处理");
+
+    @XifListener(group = "xif-group-message")
+    public void typeElse(Message message) {
+        log.info("【xif】type else 处理:{}", message);
     }
 ```
 
@@ -95,7 +92,7 @@ import lombok.experimental.Accessors;
 
 @Accessors(chain = true)
 @Data
-public class Abc<T> {
+public class Message<T> {
     private String type;
     private T data;
 }
@@ -106,32 +103,25 @@ package cn.yiynx.demo;
 
 import cn.yiynx.xif.core.XifListener;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.Future;
 
 @Slf4j
 @Component
-public class AbcXifHandler {
+public class MessageXifHandler {
 
-    @Async
-    @XifListener(group = "xif-group-abc", condition = "#abc.type eq 'type1' and #abc.data eq 2021")
-    public Future<Boolean> type1(Abc abc) {
-        log.info("【xif】type等于type1 且 data等于2021 处理");
-        return new AsyncResult<>(true);
+    @XifListener(group = "xif-group-message", condition = "#message.type eq 'type1'")
+    public void type1(Message message) {
+        log.info("【xif】type等于type1处理:{}", message);
     }
 
-    @XifListener(group = "xif-group-abc", condition = "#abc.type eq 'type2'")
-    public Boolean type2(Abc abc) {
-        log.info("【xif】type等于type2 处理");
-        return true;
+    @XifListener(group = "xif-group-message", condition = "#message.type eq 'type2'")
+    public void type2(Message message) {
+        log.info("【xif】type等于type2 处理:{}", message);
     }
-    
-    @XifListener(group = "xif-group-abc")
-    public void typeElse(Abc abc) {
-        log.info("【xif】type else 处理");
+
+    @XifListener(group = "xif-group-message")
+    public void typeElse(Message message) {
+        log.info("【xif】type else 处理:{}", message);
     }
 }
 ```
@@ -139,25 +129,32 @@ public class AbcXifHandler {
 ``` java
 package cn.yiynx.demo;
 
+import cn.yiynx.demo.xif.Message;
 import cn.yiynx.xif.core.Xif;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Random;
+
 @Slf4j
 @SpringBootTest
 class DemoApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
-	@Test
-	void testXif() {
-		log.info("testXif");
-		Abc<Integer> abc = new Abc<Integer>().setType("type1").setData(2021);
-		Xif.handler("type", abc);
-	}
+    @Test
+    void testXif() {
+        log.info("testXif");
+        Message message = new Message().setType("type" + (new Random().nextInt(3) + 1));
+        Xif.handler("xif-group-message", message);
+    }
+    // 输出：
+    // [ INFO] cn.yiynx.demo.DemoApplicationTests       : testXif
+    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, param:Message(type=type2, data=null)
+    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, condition:#message.type eq 'type1', param:Message(type=type2, data=null)
+    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, condition:#message.type eq 'type1', param:Message(type=type2, data=null), is-xif-condition-pass:false
+    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, condition:#message.type eq 'type2', param:Message(type=type2, data=null)
+    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, condition:#message.type eq 'type2', param:Message(type=type2, data=null), is-xif-condition-pass:true
+    // [ INFO] cn.yiynx.demo.xif.MessageXifHandler      : 【xif】type等于type2 处理:Message(type=type2, data=null)
 }
 ```
 日志
