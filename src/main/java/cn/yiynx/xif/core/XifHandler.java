@@ -32,7 +32,11 @@ public interface XifHandler {
     String getCondition();
 
     default boolean isElse() {
-        return !StringUtils.hasText(getCondition());
+        return !isIf();
+    }
+
+    default boolean isIf() {
+        return StringUtils.hasText(getCondition());
     }
 
     /**

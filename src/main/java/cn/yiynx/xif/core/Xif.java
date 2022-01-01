@@ -31,6 +31,9 @@ public class Xif {
     private static final Map<String, List<XifHandler>> XIF_HANDLER_MAP = new HashMap<>();
     private static final ExpressionParser parser = new SpelExpressionParser();
     private static final Map<String, Boolean> CHECK_XIF_HANDLER_REPEAT = new HashMap<>();
+
+    private Xif() {}
+
     /**
      * 注册Xif处理
      * @param xifHandler xif处理棋
@@ -41,9 +44,9 @@ public class Xif {
 
         preParseExpression(xifHandler.getCondition());
 
-        String UNIQUE_KEY = xifHandler.getGroup().concat("#").concat(xifHandler.getCondition());
-        log.debug("XIF-UNIQUE_KEY:{}", UNIQUE_KEY);
-        Assert.isTrue(CHECK_XIF_HANDLER_REPEAT.putIfAbsent(UNIQUE_KEY, Boolean.TRUE) == null, "xif-group:condition already exists");
+        String uniqueKey = xifHandler.getGroup().concat("->").concat(StringUtils.hasText(xifHandler.getCondition()) ? xifHandler.getCondition() : "else");
+        log.debug("XIF-uniqueKey:{}", uniqueKey);
+        Assert.isTrue(CHECK_XIF_HANDLER_REPEAT.putIfAbsent(uniqueKey, Boolean.TRUE) == null, "xif-group:condition already exists");
 
         if (!XIF_HANDLER_MAP.containsKey(xifHandler.getGroup())) {
             XIF_HANDLER_MAP.put(xifHandler.getGroup(), new ArrayList<>());
@@ -63,7 +66,7 @@ public class Xif {
         try {
             parser.parseExpression(condition);
         } catch (ParseException e) {
-            log.error("XifHandler-condition-error！", e);
+            log.error("XifHandler-condition-error！");
             throw e;
         }
     }
@@ -79,24 +82,24 @@ public class Xif {
         log.debug("group:{}, param:{}", group, param);
         ExpressionParser parser = new SpelExpressionParser();
         Optional<XifHandler> xifHandlerOptional = Optional.ofNullable(XIF_HANDLER_MAP.get(group))
-                .orElseThrow(() -> new IllegalArgumentException("xif-group（"+group+"）not found"))
+                .orElseThrow(() -> new IllegalArgumentException("xif-group（" + group + "）not found"))
                 .stream()
+                .filter(XifHandler::isIf)
                 .filter(xifHandler -> {
+                    Expression expression = parser.parseExpression(xifHandler.getCondition());
+                    EvaluationContext context = new StandardEvaluationContext();
+                    context.setVariable(xifHandler.getParamName(), param);
+                    Boolean isConditionPass;
                     try {
-                        log.debug("group:{}, condition:{}, param:{}", xifHandler.getGroup(), xifHandler.getCondition(), param);
-                        if (xifHandler.isElse()) { // xif-else
-                            return false;
-                        }
-                        Expression expression = parser.parseExpression(xifHandler.getCondition());
-                        EvaluationContext context = new StandardEvaluationContext();
-                        context.setVariable(xifHandler.getParamName(), param);
-                        boolean isConditionPass = expression.getValue(context, Boolean.class);
-                        log.debug("group:{}, condition:{}, param:{}, is-xif-condition-pass:{}", xifHandler.getGroup(), xifHandler.getCondition(), param, isConditionPass);
-                        return isConditionPass;
+                        isConditionPass = expression.getValue(context, Boolean.class);
                     } catch (EvaluationException e) {
-                        log.error("xifHandler-filter-error", e);
+                        log.error("xif-condition error（The result is not of type Boolean）！group:{}, condition:{}, param:{}", xifHandler.getGroup(), xifHandler.getCondition(), param);
+                        throw e;
                     }
-                    return false;
+                    if (Boolean.FALSE.equals(isConditionPass)) {
+                        log.debug("group:{}, condition:{}, param:{}, is-xif-condition-pass:{}", xifHandler.getGroup(), xifHandler.getCondition(), param, isConditionPass);
+                    }
+                    return isConditionPass;
                 }).findAny();
         // if
         if (xifHandlerOptional.isPresent()) {
@@ -107,7 +110,7 @@ public class Xif {
         if (xifHandlerOptional.isPresent()) {
             return xifHandlerOptional.get().handler(param);
         }
-        log.debug("xif-handler-other: return null");
+        log.debug("group:{}, param:{}（xif-handler-no-match: return null）", group, param);
         return null;
     }
 }

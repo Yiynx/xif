@@ -129,7 +129,6 @@ public class XifListenerMethodProcessor implements SmartInitializingSingleton, A
                 for (Method method : annotatedMethods.keySet()) {
                     XifListener xifListener = method.getAnnotation(XifListener.class);
                     XifHandler xifHandler = new XifHandler() {
-
                         @Override
                         public String getGroup() {
                             return xifListener.group();
@@ -148,11 +147,11 @@ public class XifListenerMethodProcessor implements SmartInitializingSingleton, A
                         @Override
                         public <T> Object handler(T param) {
                             try {
+                                log.debug("group:{}, condition:{}, param:{}, is-xif-condition-pass:true, xif-handler->{}", xifListener.group(), xifListener.condition(), param, method);
                                 return method.invoke(context.getBean(beanName), param);
                             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                                log.error("invoke!", e);
+                                throw new RuntimeException(e);
                             }
-                            return null;
                         }
                     };
                     Xif.register(xifHandler);

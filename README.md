@@ -20,7 +20,7 @@ Java if 扩展工具包 - if处理逻辑解耦
 <dependency>
     <groupId>cn.yiynx</groupId>
     <artifactId>xif</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 </dependency>
 ```
 ## 配置
@@ -48,7 +48,7 @@ public class DemoApplication {
 ``` java
 public void testIf() {
     log.info("testIf");
-    Message message = new Message<>().setType("type1");
+    Message message = new Message().setType("type1");
     if ("type1".equals(message.getType())) {
         log.info("【if】type等于type1 处理:{}", message);
     } else if ("type2".equals(message.getType())) {
@@ -62,7 +62,7 @@ public void testIf() {
 ``` java
     public void testXif() {
         log.info("testXif");
-        Message message = new Message<>().setType("type1");
+        Message message = new Message().setType("type1");
         Xif.handler("xif-group-message", message);
     }
     
@@ -147,14 +147,7 @@ class DemoApplicationTests {
         Message message = new Message().setType("type" + (new Random().nextInt(3) + 1));
         Xif.handler("xif-group-message", message);
     }
-    // 输出：
-    // [ INFO] cn.yiynx.demo.DemoApplicationTests       : testXif
-    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, param:Message(type=type2, data=null)
-    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, condition:#message.type eq 'type1', param:Message(type=type2, data=null)
-    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, condition:#message.type eq 'type1', param:Message(type=type2, data=null), is-xif-condition-pass:false
-    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, condition:#message.type eq 'type2', param:Message(type=type2, data=null)
-    // [DEBUG] cn.yiynx.xif.core.Xif                    : group:xif-group-message, condition:#message.type eq 'type2', param:Message(type=type2, data=null), is-xif-condition-pass:true
-    // [ INFO] cn.yiynx.demo.xif.MessageXifHandler      : 【xif】type等于type2 处理:Message(type=type2, data=null)
+
 }
 ```
 日志
