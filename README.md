@@ -82,74 +82,10 @@ public void testIf() {
     }
 ```
 
-## 编码使用示例【完整代码】
+## 编码使用示例
 
-``` java
-package cn.yiynx.demo;
+[Xif使用代码示例](https://gitee.com/yiynx/example)
 
-import lombok.Data;
-import lombok.experimental.Accessors;
-
-@Accessors(chain = true)
-@Data
-public class Message<T> {
-    private String type;
-    private T data;
-}
-```
-
-``` java
-package cn.yiynx.demo;
-
-import cn.yiynx.xif.core.XifListener;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
-@Slf4j
-@Component
-public class MessageXifHandler {
-
-    @XifListener(group = "xif-group-message", condition = "#message.type eq 'type1'")
-    public void type1(Message message) {
-        log.info("【xif】type等于type1处理:{}", message);
-    }
-
-    @XifListener(group = "xif-group-message", condition = "#message.type eq 'type2'")
-    public void type2(Message message) {
-        log.info("【xif】type等于type2 处理:{}", message);
-    }
-
-    @XifListener(group = "xif-group-message")
-    public void typeElse(Message message) {
-        log.info("【xif】type else 处理:{}", message);
-    }
-}
-```
-测试代码
-``` java
-package cn.yiynx.demo;
-
-import cn.yiynx.demo.xif.Message;
-import cn.yiynx.xif.core.Xif;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.Random;
-
-@Slf4j
-@SpringBootTest
-class DemoApplicationTests {
-
-    @Test
-    void testXif() {
-        log.info("testXif");
-        Message message = new Message().setType("type" + (new Random().nextInt(3) + 1));
-        Xif.handler("xif-group-message", message);
-    }
-
-}
-```
 日志
 ```
 logging.level.cn.yiynx.xif=debug
